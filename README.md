@@ -10,8 +10,6 @@ To use, run "python3 main.py"
 
 python libraries:
 
-os
-
+`os
 subprocess
-
-tkinter
+tkinter`
