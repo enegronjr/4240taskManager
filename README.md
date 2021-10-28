@@ -1,5 +1,5 @@
-# Prjoect for CPSC 4240
 # Linux task manager
+## Prjoect for CPSC 4240
 
 Currently more of a proof of concept than a final product.
 
@@ -8,7 +8,7 @@ for processes
 
 To use, run "python3 main.py"
 
-##### python libraries:
+### python libraries:
 
 `os`
 
