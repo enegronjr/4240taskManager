@@ -1,6 +1,3 @@
-procinfo package
-install with 'sudo apt install procinfo'
-
-python libraries:
 os
 subprocess
+tkinter
