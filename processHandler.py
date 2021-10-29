@@ -10,7 +10,9 @@ def getProcesses():
 
     procArr = []
     for x in f:
-        pID = str(x[65:-1])
+        # this changes per machine because I was lazy
+        # pID = str(x[65:-1])
+        pID = str(x[42:-1])
         if pID.isnumeric():
             try:
                 return_val = subprocess.check_output(["cat", "/proc/" + pID + "/comm"])
@@ -25,6 +27,10 @@ def getProcesses():
 
     return procArr
 
+def killProcess(pID):
+    command = "kill -9 "
+    os.system(command + pID)
+    print("killed " + pID)
 
 if __name__ == '__main__':
     pArr = getProcesses()
