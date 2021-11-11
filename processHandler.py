@@ -1,9 +1,13 @@
 import subprocess
 import os
+import psutil
 
 # processes are listed in /proc
 
 def getProcesses():
+
+    
+
     os.system("ls -lt /proc | grep '^d' > processes")
     f = open('processes')
 
@@ -11,9 +15,8 @@ def getProcesses():
     procArr = []
     for x in f:
         # this changes per machine because I was lazy
-        pID = str(x[57:-1])
-        # pID = str(x[42:-1])
-        
+        # pID = str(x[65:-1])
+        pID = str(x[156:-1])
         if pID.isnumeric():
             try:
                 return_val = subprocess.check_output(["cat", "/proc/" + pID + "/comm"])
