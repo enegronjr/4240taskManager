@@ -59,7 +59,11 @@ def setup():
     # Button to quit the app
     button_quit = Button(frame_ProcName, text="Quit", command = lambda:root.destroy()).grid(row=1, column=0)
     
-    listProcesses(2, frame_ProcName)
+    # Labels to fill empty space
+    Label(frame_CPU, width=20).grid(row=0, column=0)
+    Label(frame_Mem, width=20).grid(row=0, column=0)
+    
+    listProcesses(2, frame_ProcName, frame_CPU, frame_Mem)
     procList()
 
     root.mainloop()
@@ -88,7 +92,7 @@ def procList():
 # Print list of active processes in GUI
 # posStart = the next free row position in frameName
 # frameName = the frame that the processes will be listed in
-def listProcesses(posStart, frameName):
+def listProcesses(posStart, frameName, frameCPU, frameMem):
 
     # temp variable for row position
     r = posStart
@@ -101,13 +105,23 @@ def listProcesses(posStart, frameName):
         pid = proc.pid
         name = proc.name()
         user = proc.username()
+        cpuP = proc.cpu_percent(interval=1.0)
+        memP = round(proc.memory_percent(), 4)
+
         # Put Process info into the frame
         Label(frameName, text=pid).grid(row=r, column=c)
         c+=1
         Label(frameName, text=name).grid(row=r, column=c)
         c+=1
         Label(frameName, text=user).grid(row=r, column=c)
+        Label(frameCPU, text=cpuP).grid(row=r, column=0)
+        Label(frameMem, text=memP).grid(row=r, column=0)
         r+=1
+
+
+        
+
+
 
 
 # delete and recreate process list
