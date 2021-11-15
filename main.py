@@ -30,7 +30,7 @@ def setup():
     tabs.add(tab_user, text="Users")
     # Put tab manager in GUI
     tabs.pack(expand=1, fill='both')
-
+    
     """ PROCESS TAB SETUP """
 
     # Create Frames
@@ -38,15 +38,26 @@ def setup():
     frame_Disk = LabelFrame(tab_proc, text = "Disk", width=150)
     frame_Mem = LabelFrame(tab_proc, text = "Memory", width=150)
     frame_CPU = LabelFrame(tab_proc, text = "CPU", width=150)
-    frame_ProcName = LabelFrame(tab_proc, text = "Process Name")
     # Put names into GUI tab
     frame_Net.pack(fill = "y", side = "right")
     frame_Disk.pack(fill = "y", side = "right")
     frame_Mem.pack(fill = "y", side = "right")
     frame_CPU.pack(fill = "y", side = "right")
-    frame_ProcName.pack(fill = "both", expand = "yes", side = "right")
+
+    # Special function to create the frame with the process frames
+    makeProcNameFrame(tab_proc)
     
-    """ PROCESS NAMES """
+    # Labels to fill empty space
+    # Label(frame_CPU, width=20).grid(row=0, column=0)
+    # Label(frame_Mem, width=20).grid(row=0, column=0)
+    # listProcesses(2, frame_ProcName, frame_CPU, frame_Mem)
+
+    root.mainloop()
+
+# Creates the frame with the process names
+def makeProcNameFrame(tabName):
+    frame_ProcName = LabelFrame(tabName, text = "Process Name")
+    frame_ProcName.pack(fill = "both", expand = "yes", side = "right")
 
     # String variable that holds PID
     pid_var = StringVar()
@@ -58,15 +69,23 @@ def setup():
     button_killProc = Button(frame_ProcName, text="Kill", command = lambda:killCallBack(pid_var.get())).grid(row=0, column=2)
     # Button to quit the app
     button_quit = Button(frame_ProcName, text="Quit", command = lambda:root.destroy()).grid(row=1, column=0)
+    # Button to "refresh" the current list of running processes
+    button_listProcs = Button(frame_ProcName, text="List Processes", command = lambda:refreshProcFrame(tabName, frame_ProcName)).grid(row=2, column=0)
+    # List actively running processes
+    listProcesses(3, frame_ProcName)
+    #???
+    labels = procList()
     
-    # Labels to fill empty space
-    Label(frame_CPU, width=20).grid(row=0, column=0)
-    Label(frame_Mem, width=20).grid(row=0, column=0)
-    
-    listProcesses(2, frame_ProcName, frame_CPU, frame_Mem)
-    procList()
 
-    root.mainloop()
+# Refreshes the list of actively running processes
+# tabName = the parent frame of 'frameName'
+# frameName = the frame being "refreshed"
+def refreshProcFrame(tabName, frameName):
+    # Destroy frameName
+    frameName.destroy()
+    # Remake frameName within tabName
+    makeProcNameFrame(tabName)
+
     
 
 # Get list of active processes
