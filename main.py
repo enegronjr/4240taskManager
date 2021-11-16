@@ -1,11 +1,10 @@
+from typing import FrozenSet
 import processHandler
 import os
 from tkinter import *
 from tkinter import ttk
 import psutil
 
-# create list for processes
-labels = []
 #GUI window
 root = Tk()
 
@@ -13,7 +12,7 @@ def setup():
 
     # Setup title and size of GUI
     root.title("Linux Task Manager")
-    root.geometry("1000x400")
+    root.geometry("500x500")
     root.resizable(True, True)
 
     """ TAB MANAGEMENT """
@@ -31,21 +30,10 @@ def setup():
     # Put tab manager in GUI
     tabs.pack(expand=1, fill='both')
     
-    """ PROCESS TAB SETUP """
-
-    # Create Frames
-    frame_Net = LabelFrame(tab_proc, text = "Network", width=150)
-    frame_Disk = LabelFrame(tab_proc, text = "Disk", width=150)
-    frame_Mem = LabelFrame(tab_proc, text = "Memory", width=150)
-    frame_CPU = LabelFrame(tab_proc, text = "CPU", width=150)
-    # Put names into GUI tab
-    frame_Net.pack(fill = "y", side = "right")
-    frame_Disk.pack(fill = "y", side = "right")
-    frame_Mem.pack(fill = "y", side = "right")
-    frame_CPU.pack(fill = "y", side = "right")
-
     # Special function to create the frame with the process frames
     makeProcNameFrame(tab_proc)
+    makePerformanceFrame(tab_perf)
+    makeUsersFrame(tab_user)
     
     # Labels to fill empty space
     # Label(frame_CPU, width=20).grid(row=0, column=0)
@@ -56,25 +44,36 @@ def setup():
 
 # Creates the frame with the process names
 def makeProcNameFrame(tabName):
-    frame_ProcName = LabelFrame(tabName, text = "Process Name")
-    frame_ProcName.pack(fill = "both", expand = "yes", side = "right")
+    """ PROCESS TAB SETUP """
+
+    frame_proc = ttk.Frame(tabName)
+    frame_proc.pack(fill="both", expand="yes")
+    # Create Frames
+    frame_topBar = LabelFrame(frame_proc, height=30)
+    frame_Mem = LabelFrame(frame_proc, text = "Memory", width=250)
+    frame_CPU = LabelFrame(frame_proc, text = "CPU", width=250)
+    frame_ProcName = LabelFrame(frame_proc, text = "Process Name")
+
+    # Put names into GUI tab
+    frame_topBar.pack(fill='x', side='top')
+    frame_Mem.pack(fill = "y", side = "right")
+    frame_CPU.pack(fill = "y", side = "right")
+    frame_ProcName.pack(fill = "both", expand="yes", side = "right")
 
     # String variable that holds PID
     pid_var = StringVar()
     # Label for the PID "to kill"
-    label_ProcID = Label(frame_ProcName, text="pID").grid(row=0, column=0)
+    label_ProcID = Label(frame_topBar, text="pID").grid(row=0, column=1)
     # Entry for the PID "to kill"
-    entry_ProcID = Entry(frame_ProcName, textvariable=pid_var).grid(row=0, column=1)
+    entry_ProcID = Entry(frame_topBar, textvariable=pid_var).grid(row=0, column=2)
     # Button for the PID "to kill"
-    button_killProc = Button(frame_ProcName, text="Kill", command = lambda:killCallBack(pid_var.get())).grid(row=0, column=2)
+    button_killProc = Button(frame_topBar, text="Kill", command = lambda:killCallBack(pid_var.get())).grid(row=0, column=3)
     # Button to quit the app
-    button_quit = Button(frame_ProcName, text="Quit", command = lambda:root.destroy()).grid(row=1, column=0)
+    button_quit = Button(frame_topBar, text="Quit", command = lambda:root.destroy()).grid(row=1, column=0)
     # Button to "refresh" the current list of running processes
-    button_listProcs = Button(frame_ProcName, text="List Processes", command = lambda:refreshProcFrame(tabName, frame_ProcName)).grid(row=2, column=0)
+    button_listProcs = Button(frame_topBar, text="List Processes", command = lambda:refreshProcFrame(tabName, frame_proc)).grid(row=0, column=0)
     # List actively running processes
-    listProcesses(3, frame_ProcName)
-    #???
-    labels = procList()
+    listProcesses(3, frame_ProcName, frame_CPU, frame_Mem)
     
 
 # Refreshes the list of actively running processes
@@ -87,54 +86,83 @@ def refreshProcFrame(tabName, frameName):
     makeProcNameFrame(tabName)
 
     
+def makePerformanceFrame(tabName):
+    frame_Performance = LabelFrame(tabName, text="Performance")
+    frame_Performance.pack(fill = "both", expand = "yes")
 
-# Get list of active processes
-def procList():
+    # button to refresh preformance stats
+    button_refresh = Button(frame_Performance, text="Refresh", command=lambda:refreshPrefFrame(tabName, frame_Performance)).grid(row=0, column=0)
+    # button to quit the app
+    button_quit = Button(frame_Performance, text="Quit", command = lambda:root.destroy()).grid(row=0, column=1)
+    # Label for cpu usage
+    label_cpu = Label(frame_Performance, text="CPU", font=('Arial',16)).grid(row=1, column=0)
+    label_cpuUsage = Label(frame_Performance, text=(str(psutil.cpu_percent()) + '%')).grid(row=1, column=2)
+    # Label for memory usage
+    mem = psutil.virtual_memory()
+    gb = 1000000000
+    label_mem = Label(frame_Performance, text="Memory", font=('Arial',16)).grid(row=2, column=0)
+    label_memUsage = Label(frame_Performance, text=(str(round((mem.total - mem.available)/gb, 1)) + '/' + str(round(mem.total/gb, 1)) + ' GB  ' + str(mem.percent) + '%')).grid(row=2, column=2)
+    # Label for disk usage
+    disk = psutil.disk_usage('/')
+    label_disk = Label(frame_Performance, text="Disk", font=('Arial',16)).grid(row=3, column=0)
+    label_diskUsage = Label(frame_Performance, text=(str(disk.percent) + '%')).grid(row=3, column=2)
 
-    # Array to hold process info
-    procArr = []
 
-    # Iterate through processes and get PID, name, and username
-    for proc in psutil.process_iter(['pid', 'name', 'username']):
+def refreshPrefFrame(tabName, frameName):
+    frameName.destroy()
+    makePerformanceFrame(tabName)
 
-        # temp hold variables for process info
-        pid = proc.pid
-        name = proc.name()
-        user = proc.username()
+def makeUsersFrame(tabName):
+    frame_Users = LabelFrame(tabName, text="Users")
+    frame_Users.pack(fill ="both", expand="yes")
 
-        # Add process to the list of processes
-        procArr.append((pid, name, user)) 
-    # # Return list of processes
-    return procArr     
+    # button to refresh users
+    button_refresh = Button(frame_Users, text="Refresh", command=lambda:refreshUsersFrame(tabName, frame_Users)).grid(row=0, column=0)
+    # button to quit the app
+    button_quit = Button(frame_Users, text="Quit", command = lambda:root.destroy()).grid(row=0, column=1)
+
+    r = 1
+    for user in psutil.users():
+        Label(frame_Users, text=str(user.name)).grid(row=r, column=0)
+        r+=1
+
+def refreshUsersFrame(tabName, frameName):
+    frameName.destroy()
+    makeUsersFrame(tabName)   
 
 
 # Print list of active processes in GUI
 # posStart = the next free row position in frameName
 # frameName = the frame that the processes will be listed in
-def listProcesses(posStart, frameName, frameCPU, frameMem):
+def listProcesses(posStart, frameName, frameCpu, frameMem):
 
     # temp variable for row position
     r = posStart
 
+    procs = []
     # Iterate through processes and get PID, name, and username
-    for proc in psutil.process_iter(['pid', 'name', 'username']):
-        # temp column variable
-        c=0
+    for proc in psutil.process_iter():
         # temp hold variables for process info
         pid = proc.pid
         name = proc.name()
         user = proc.username()
-        cpuP = proc.cpu_percent(interval=1.0)
-        memP = round(proc.memory_percent(), 4)
+        mem = round(proc.memory_percent(), 2)
+        cpu = proc.cpu_percent()
+        procs.append((pid, name, user, mem, cpu))
 
+    procs.sort(reverse=True)
+
+    for proc in procs:
+        # temp column variable
+        c=0
         # Put Process info into the frame
-        Label(frameName, text=pid).grid(row=r, column=c)
+        Label(frameName, text=proc[0]).grid(row=r, column=c)
         c+=1
-        Label(frameName, text=name).grid(row=r, column=c)
+        Label(frameName, text=proc[1]).grid(row=r, column=c)
         c+=1
-        Label(frameName, text=user).grid(row=r, column=c)
-        Label(frameCPU, text=cpuP).grid(row=r, column=0)
-        Label(frameMem, text=memP).grid(row=r, column=0)
+        Label(frameName, text=proc[2]).grid(row=r, column=c)
+        Label(frameCpu, text=proc[4], width=15).grid(row=r, column=0)
+        Label(frameMem, text=proc[3], width=15).grid(row=r, column=0)
         r+=1
 
 
@@ -152,11 +180,6 @@ def update():
         name.set("")
     labels.clear()
 
-# def updateProcList(pos, frame):
-#     while True:
-#         listProcesses(pos, frame)
-#         self.after(1000,updateProcList(pos, frame))
-#     # create()
 
 # callback function for button. Kills process
 def killCallBack(pID):
@@ -165,13 +188,7 @@ def killCallBack(pID):
 
 
 def main():
-
     setup()
-
-    # # inital process list
-    # create()
-
-
     root.mainloop()
 
 
