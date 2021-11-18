@@ -1,3 +1,7 @@
+# 4240 Clemson Fall 2021
+# Linux Task Manager
+# Breanna Filipiak, Eddie Negron, Sterling Rich
+
 from typing import FrozenSet
 import processHandler
 import os
@@ -8,6 +12,7 @@ import psutil
 #GUI window
 root = Tk()
 
+# Sets up the GUI window for the application
 def setup():
 
     # Setup title and size of GUI
@@ -30,25 +35,25 @@ def setup():
     # Put tab manager in GUI
     tabs.pack(expand=1, fill='both')
     
-    # Special function to create the frame with the process frames
+    # Functions to create the Label Frames tat hold the process information
     makeProcNameFrame(tab_proc)
     makePerformanceFrame(tab_perf)
     makeUsersFrame(tab_user)
-    
-    # Labels to fill empty space
-    # Label(frame_CPU, width=20).grid(row=0, column=0)
-    # Label(frame_Mem, width=20).grid(row=0, column=0)
-    # listProcesses(2, frame_ProcName, frame_CPU, frame_Mem)
 
+    # Tkinter function to continue to run the GUI
     root.mainloop()
 
 # Creates the frame with the process names
+# tabName = The parent of the frame
 def makeProcNameFrame(tabName):
+    
     """ PROCESS TAB SETUP """
 
+    #Create the frame
     frame_proc = ttk.Frame(tabName)
     frame_proc.pack(fill="both", expand="yes")
-    # Create Frames
+    
+    # Create subframes
     frame_topBar = LabelFrame(frame_proc, height=30)
     frame_Mem = LabelFrame(frame_proc, text = "Memory", width=250)
     frame_CPU = LabelFrame(frame_proc, text = "CPU", width=250)
@@ -85,8 +90,11 @@ def refreshProcFrame(tabName, frameName):
     # Remake frameName within tabName
     makeProcNameFrame(tabName)
 
-    
+# Creates the frame with process performance information
+# tabName = name of the parent frame
 def makePerformanceFrame(tabName):
+    
+    # create the frame
     frame_Performance = LabelFrame(tabName, text="Performance")
     frame_Performance.pack(fill = "both", expand = "yes")
 
@@ -107,25 +115,34 @@ def makePerformanceFrame(tabName):
     label_disk = Label(frame_Performance, text="Disk", font=('Arial',16)).grid(row=3, column=0)
     label_diskUsage = Label(frame_Performance, text=(str(disk.percent) + '%')).grid(row=3, column=2)
 
-
+# Refresh the frame with the performance information
+# tabName = parent of the frame being refreshed
+# frameName = name of the frame that is being refreshed
 def refreshPrefFrame(tabName, frameName):
     frameName.destroy()
     makePerformanceFrame(tabName)
 
+# Creates the frame that holds user process information
+# tabName = name of the parent frame
 def makeUsersFrame(tabName):
+    # Create the frame
     frame_Users = LabelFrame(tabName, text="Users")
     frame_Users.pack(fill ="both", expand="yes")
 
-    # button to refresh users
+    # Button to refresh users
     button_refresh = Button(frame_Users, text="Refresh", command=lambda:refreshUsersFrame(tabName, frame_Users)).grid(row=0, column=0)
-    # button to quit the app
+    # Button to quit the app
     button_quit = Button(frame_Users, text="Quit", command = lambda:root.destroy()).grid(row=0, column=1)
 
+    # Create Labels with usernames for each process
     r = 1
     for user in psutil.users():
         Label(frame_Users, text=str(user.name)).grid(row=r, column=0)
         r+=1
 
+# Refreshes the frame with the user process information
+# tabName = the parent frame of the frame that is being refreshed
+# frameName = the name of the frame that is being refreshed
 def refreshUsersFrame(tabName, frameName):
     frameName.destroy()
     makeUsersFrame(tabName)   
@@ -165,12 +182,6 @@ def listProcesses(posStart, frameName, frameCpu, frameMem):
         Label(frameMem, text=proc[3], width=15).grid(row=r, column=0)
         r+=1
 
-
-        
-
-
-
-
 # delete and recreate process list
 def update():
     global labels
@@ -180,17 +191,14 @@ def update():
         name.set("")
     labels.clear()
 
-
 # callback function for button. Kills process
 def killCallBack(pID):
     processHandler.killProcess(pID)
     update()
 
-
 def main():
     setup()
     root.mainloop()
-
 
 if __name__ == '__main__':
     main()
