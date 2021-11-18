@@ -1,3 +1,7 @@
+# 4240 Clemson Fall 2021
+# Linux Task Manager
+# Breanna Filipiak, Eddie Negron, Sterling Rich
+
 import subprocess
 import os
 import psutil
